@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from sqlalchemy.orm import Session
 
 from .database import (
@@ -29,7 +29,22 @@ from .pdf_service import (
 
 UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "uploads")
 STATIC_DIST_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
+BACKEND_STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+def find_static_dir():
+    """Discover available frontend production build directory."""
+    candidates = [
+        BACKEND_STATIC_DIR,
+        STATIC_DIST_DIR,
+        os.path.join(os.getcwd(), "backend", "static"),
+        os.path.join(os.getcwd(), "frontend", "dist"),
+        os.path.join(os.getcwd(), "static"),
+    ]
+    for c in candidates:
+        if os.path.exists(c) and os.path.exists(os.path.join(c, "index.html")):
+            return os.path.abspath(c)
+    return None
 
 def seed_sample_data(db: Session):
     """Seed initial demo user and comprehensive sample resume for testing."""
@@ -646,9 +661,40 @@ def health_check():
     return {"status": "ok", "service": "Online Resume Builder Backend", "version": "1.0.0"}
 
 
-# Serve static frontend if built
-if os.path.exists(STATIC_DIST_DIR):
-    app.mount("/", StaticFiles(directory=STATIC_DIST_DIR, html=True), name="frontend")
+# Serve static frontend with SPA fallback
+RESOLVED_STATIC_DIR = find_static_dir()
+
+if RESOLVED_STATIC_DIR:
+    assets_dir = os.path.join(RESOLVED_STATIC_DIR, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="frontend_assets")
+
+    @app.get("/")
+    def serve_index():
+        return FileResponse(os.path.join(RESOLVED_STATIC_DIR, "index.html"))
+
+    @app.head("/")
+    def serve_index_head():
+        return FileResponse(os.path.join(RESOLVED_STATIC_DIR, "index.html"))
+
+    @app.get("/{full_path:path}")
+    def serve_spa_route(full_path: str):
+        if full_path.startswith(("api/", "uploads/", "docs", "openapi.json", "redoc")):
+            raise HTTPException(status_code=404, detail="API route not found")
+        target_file = os.path.join(RESOLVED_STATIC_DIR, full_path)
+        if os.path.exists(target_file) and os.path.isfile(target_file):
+            return FileResponse(target_file)
+        return FileResponse(os.path.join(RESOLVED_STATIC_DIR, "index.html"))
+else:
+    @app.get("/")
+    def serve_fallback_info():
+        return HTMLResponse(
+            "<html><body style='font-family:sans-serif;text-align:center;padding:50px;'>"
+            "<h1>Online Resume Builder API</h1>"
+            "<p>API is running successfully. Please build the frontend with <code>npm run build</code>.</p>"
+            "<p><a href='/docs'>View Swagger API Documentation</a></p>"
+            "</body></html>"
+        )
 
 
 if __name__ == "__main__":
