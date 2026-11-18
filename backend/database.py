@@ -8,15 +8,36 @@ from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 # Database URL resolution: Supabase / PostgreSQL or local SQLite fallback
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./resume_builder.db")
 
-# If PostgreSQL URL uses postgres:// instead of postgresql:// (e.g. older Heroku / Supabase URLs)
+# Normalize PostgreSQL URL
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
+# In SQLAlchemy 2.0, postgresql:// defaults to psycopg (v3).
+# If the URL is postgresql:// (without a dialect prefix like +psycopg or +psycopg2),
+# verify which driver is installed. If only psycopg2 is installed, use postgresql+psycopg2://.
+if DATABASE_URL.startswith("postgresql://") and not DATABASE_URL.startswith("postgresql+"):
+    try:
+        import psycopg  # psycopg 3
+    except ImportError:
+        try:
+            import psycopg2  # psycopg 2
+            DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
+        except ImportError:
+            pass
+
 connect_args = {}
-if DATABASE_URL.startswith("sqlite"):
+if "sqlite" in DATABASE_URL:
     connect_args = {"check_same_thread": False}
 
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
+try:
+    engine = create_engine(DATABASE_URL, connect_args=connect_args)
+    # verify dialect driver can be imported
+    _ = engine.dialect.dbapi
+except Exception as err:
+    print(f"[WARNING] Database engine creation failed for '{DATABASE_URL}': {err}. Falling back to SQLite.")
+    DATABASE_URL = "sqlite:///./resume_builder.db"
+    engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
@@ -158,4 +179,12 @@ def get_db():
 
 
 def init_db():
-    Base.metadata.create_all(bind=engine)
+    global engine, SessionLocal
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"[WARNING] Database connection/table creation failed on '{engine.url}': {e}. Falling back to SQLite.")
+        fallback_url = "sqlite:///./resume_builder.db"
+        engine = create_engine(fallback_url, connect_args={"check_same_thread": False})
+        SessionLocal.configure(bind=engine)
+        Base.metadata.create_all(bind=engine)

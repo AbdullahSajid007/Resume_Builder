@@ -149,6 +149,14 @@ activemq-data/
 # SageMath parsed files
 *.sage.py
 
+# Databases
+*.db
+*.sqlite3
+
+# Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
 # Environments
 .env
 .envrc
