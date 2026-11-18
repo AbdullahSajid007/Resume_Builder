@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    @page {
+        size: a4 portrait;
+        margin: 1.5cm 1.5cm 1.5cm 1.5cm;
+    }
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        color: #222222;
+        font-size: 10pt;
+        line-height: 1.4;
+        margin: 0;
+        padding: 0;
+    }
+    .header-table {
+        width: 100%;
+        margin-bottom: 15px;
+        border-bottom: 2px solid {{ theme_color }};
+        padding-bottom: 12px;
+    }
+    .name-title h1 {
+        margin: 0;
+        font-size: 22pt;
+        color: {{ theme_color }};
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .name-title h3 {
+        margin: 4px 0 8px 0;
+        font-size: 12pt;
+        color: #555555;
+        font-weight: normal;
+    }
+    .contact-bar {
+        font-size: 8.5pt;
+        color: #444444;
+        line-height: 1.5;
+    }
+    .contact-item {
+        display: inline-block;
+        margin-right: 12px;
+    }
+    .photo-cell {
+        width: 90px;
+        text-align: right;
+        vertical-align: middle;
+    }
+    .avatar-img {
+        width: 75px;
+        height: 75px;
+        border-radius: 40px;
+        border: 2px solid {{ theme_color }};
+    }
+    .section-title {
+        font-size: 11pt;
+        font-weight: bold;
+        color: {{ theme_color }};
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 3px;
+        margin-top: 14px;
+        margin-bottom: 8px;
+    }
+    .summary-text {
+        font-size: 9.5pt;
+        color: #333333;
+        text-align: justify;
+        margin-bottom: 10px;
+    }
+    .entry-table {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    .entry-left {
+        width: 75%;
+        vertical-align: top;
+    }
+    .entry-right {
+        width: 25%;
+        text-align: right;
+        vertical-align: top;
+        font-size: 8.5pt;
+        color: #666666;
+    }
+    .entry-role {
+        font-size: 10pt;
+        font-weight: bold;
+        color: #222222;
+    }
+    .entry-org {
+        font-size: 9.5pt;
+        color: #444444;
+        font-style: italic;
+    }
+    .entry-desc {
+        font-size: 9pt;
+        color: #444444;
+        margin-top: 3px;
+        line-height: 1.35;
+    }
+    .skills-container {
+        margin-bottom: 10px;
+    }
+    .skill-tag {
+        display: inline-block;
+        background-color: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-left: 3px solid {{ theme_color }};
+        padding: 3px 8px;
+        margin: 2px 4px 3px 0;
+        font-size: 8.5pt;
+        color: #1e293b;
+        border-radius: 3px;
+    }
+    .social-links {
+        font-size: 8.5pt;
+        color: {{ theme_color }};
+        margin-top: 4px;
+    }
+</style>
+</head>
+<body>
+
+<!-- Header Table -->
+<table class="header-table" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="name-title" valign="top">
+            <h1>{{ info.full_name or "Your Full Name" }}</h1>
+            {% if info.professional_title %}
+            <h3>{{ info.professional_title }}</h3>
+            {% endif %}
+            
+            <div class="contact-bar">
+                {% if info.email %}<span class="contact-item"><b>Email:</b> {{ info.email }}</span>{% endif %}
+                {% if info.phone %}<span class="contact-item"><b>Phone:</b> {{ info.phone }}</span>{% endif %}
+                {% if info.location %}<span class="contact-item"><b>Location:</b> {{ info.location }}</span>{% endif %}
+            </div>
+
+            {% if info.linkedin_url or info.github_url or info.portfolio_url or info.twitter_url or info.leetcode_url %}
+            <div class="social-links">
+                {% if info.linkedin_url %}<span><b>LinkedIn:</b> {{ info.linkedin_url }} </span> &nbsp;|&nbsp; {% endif %}
+                {% if info.github_url %}<span><b>GitHub:</b> {{ info.github_url }} </span> &nbsp;|&nbsp; {% endif %}
+                {% if info.portfolio_url %}<span><b>Portfolio:</b> {{ info.portfolio_url }} </span> &nbsp;|&nbsp; {% endif %}
+                {% if info.leetcode_url %}<span><b>LeetCode:</b> {{ info.leetcode_url }}</span>{% endif %}
+            </div>
+            {% endif %}
+        </td>
+        {% if info.photo_url %}
+        <td class="photo-cell" valign="top">
+            <img class="avatar-img" src="{{ info.photo_url }}" alt="Profile" />
+        </td>
+        {% endif %}
+    </tr>
+</table>
+
+<!-- Professional Summary -->
+{% if info.summary %}
+<div class="section-title">Professional Summary</div>
+<div class="summary-text">{{ info.summary }}</div>
+{% endif %}
+
+<!-- Experience -->
+{% if experiences and experiences|length > 0 %}
+<div class="section-title">Work Experience</div>
+{% for exp in experiences %}
+<table class="entry-table" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="entry-left">
+            <span class="entry-role">{{ exp.job_title }}</span> &mdash; <span class="entry-org">{{ exp.company }}</span>
+            {% if exp.location %}<span style="color:#777; font-size:8.5pt;"> ({{ exp.location }})</span>{% endif %}
+        </td>
+        <td class="entry-right">
+            {{ exp.start_date }} - {% if exp.is_current %}Present{% else %}{{ exp.end_date or "Present" }}{% endif %}
+        </td>
+    </tr>
+    {% if exp.responsibilities %}
+    <tr>
+        <td colspan="2" class="entry-desc">
+            {{ exp.responsibilities }}
+        </td>
+    </tr>
+    {% endif %}
+</table>
+{% endfor %}
+{% endif %}
+
+<!-- Education -->
+{% if educations and educations|length > 0 %}
+<div class="section-title">Education Background</div>
+{% for edu in educations %}
+<table class="entry-table" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="entry-left">
+            <span class="entry-role">{{ edu.degree }}</span> &mdash; <span class="entry-org">{{ edu.institution }}</span>
+            {% if edu.location %}<span style="color:#777; font-size:8.5pt;"> ({{ edu.location }})</span>{% endif %}
+        </td>
+        <td class="entry-right">
+            {% if edu.start_year %}{{ edu.start_year }} - {% endif %}{{ edu.end_year }}
+        </td>
+    </tr>
+    {% if edu.cgpa or edu.achievements %}
+    <tr>
+        <td colspan="2" class="entry-desc">
+            {% if edu.cgpa %}<b>CGPA / Result:</b> {{ edu.cgpa }} &nbsp; {% endif %}
+            {% if edu.achievements %}{{ edu.achievements }}{% endif %}
+        </td>
+    </tr>
+    {% endif %}
+</table>
+{% endfor %}
+{% endif %}
+
+<!-- Skills -->
+{% if skills and skills|length > 0 %}
+<div class="section-title">Skills & Proficiencies</div>
+<div class="skills-container">
+    {% for skill in skills %}
+    <span class="skill-tag"><b>{{ skill.name }}</b> ({{ skill.proficiency_level }})</span>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Projects -->
+{% if projects and projects|length > 0 %}
+<div class="section-title">Key Projects</div>
+{% for proj in projects %}
+<table class="entry-table" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="entry-left">
+            <span class="entry-role">{{ proj.title }}</span>
+            {% if proj.technologies %}<span style="color:{{ theme_color }}; font-size:8.5pt;"> [{{ proj.technologies }}]</span>{% endif %}
+        </td>
+        <td class="entry-right">
+            {% if proj.project_url %}<a href="{{ proj.project_url }}" style="color:{{ theme_color }};">View Project</a>{% endif %}
+        </td>
+    </tr>
+    {% if proj.description %}
+    <tr>
+        <td colspan="2" class="entry-desc">{{ proj.description }}</td>
+    </tr>
+    {% endif %}
+</table>
+{% endfor %}
+{% endif %}
+
+<!-- Certifications -->
+{% if certifications and certifications|length > 0 %}
+<div class="section-title">Certifications & Credentials</div>
+{% for cert in certifications %}
+<table class="entry-table" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="entry-left">
+            <span class="entry-role">{{ cert.name }}</span>
+            {% if cert.issuing_org %} &mdash; <span class="entry-org">{{ cert.issuing_org }}</span>{% endif %}
+        </td>
+        <td class="entry-right">
+            {{ cert.issue_date }}
+        </td>
+    </tr>
+</table>
+{% endfor %}
+{% endif %}
+
+</body>
+</html>

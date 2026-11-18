@@ -1,0 +1,22 @@
+flowchart LR
+    %% Data Flow Diagram Level 0 - Context Diagram
+    Candidate[("fa:fa-user Job Seeker / Candidate")]
+    SystemCore[["0.0<br/>Online Resume Builder<br/>& PDF Generation System"]]
+    Database[("fa:fa-database PostgreSQL / Supabase<br/>Resumes & Users Store")]
+
+    %% Flows from Candidate to System
+    Candidate -->|"1. Registration / Login Credentials"| SystemCore
+    Candidate -->|"2. Profile Details & Avatar File"| SystemCore
+    Candidate -->|"3. Resume Data (Personal, Edu, Exp, Skills)"| SystemCore
+    Candidate -->|"4. Template & Theme Choices"| SystemCore
+    Candidate -->|"5. PDF Generation Request"| SystemCore
+
+    %% Flows from System to Candidate
+    SystemCore -->|"6. Auth Token & Session State"| Candidate
+    SystemCore -->|"7. Live Formatted Resume Preview"| Candidate
+    SystemCore -->|"8. Validation Alerts & Field Feedback"| Candidate
+    SystemCore -->|"9. Downloadable Formatted PDF File"| Candidate
+
+    %% Flows between System and Database
+    SystemCore -->|"10. Store/Update User Credentials & Drafts"| Database
+    Database -->|"11. Retrieve Saved Profiles & Resumes"| SystemCore

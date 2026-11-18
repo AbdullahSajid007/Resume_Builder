@@ -1,0 +1,99 @@
+erDiagram
+    %% Entity Relationship Diagram (ERD) for Online Resume Builder
+    USERS ||--o{ RESUMES : "creates and owns"
+    RESUMES ||--|| PERSONAL_INFOS : "contains"
+    RESUMES ||--o{ EDUCATIONS : "includes"
+    RESUMES ||--o{ EXPERIENCES : "includes"
+    RESUMES ||--o{ SKILLS : "lists"
+    RESUMES ||--o{ PROJECTS : "showcases"
+    RESUMES ||--o{ CERTIFICATIONS : "includes"
+
+    USERS {
+        int id PK
+        string name "NOT NULL"
+        string email "UNIQUE, NOT NULL"
+        string password_hash "NOT NULL"
+        string phone
+        string avatar_url
+        datetime created_at
+        datetime updated_at
+    }
+
+    RESUMES {
+        int id PK
+        int user_id FK "REFERENCES USERS(id) ON DELETE CASCADE"
+        string title "NOT NULL"
+        string template_name "DEFAULT 'modern'"
+        string theme_color "DEFAULT '#1e3a8a'"
+        string font_family "DEFAULT 'Inter'"
+        boolean is_draft "DEFAULT false"
+        datetime created_at
+        datetime updated_at
+    }
+
+    PERSONAL_INFOS {
+        int id PK
+        int resume_id FK "UNIQUE, REFERENCES RESUMES(id) ON DELETE CASCADE"
+        string full_name "NOT NULL"
+        string email "NOT NULL"
+        string phone "NOT NULL"
+        string location
+        string professional_title
+        text summary
+        string photo_url
+        string linkedin_url
+        string github_url
+        string portfolio_url
+        string twitter_url
+        string leetcode_url
+    }
+
+    EDUCATIONS {
+        int id PK
+        int resume_id FK "REFERENCES RESUMES(id) ON DELETE CASCADE"
+        string degree "NOT NULL"
+        string institution "NOT NULL"
+        string location
+        string start_year
+        string end_year "NOT NULL"
+        string cgpa
+        text achievements
+    }
+
+    EXPERIENCES {
+        int id PK
+        int resume_id FK "REFERENCES RESUMES(id) ON DELETE CASCADE"
+        string job_title "NOT NULL"
+        string company "NOT NULL"
+        string location
+        string start_date "NOT NULL"
+        string end_date
+        boolean is_current "DEFAULT false"
+        text responsibilities
+    }
+
+    SKILLS {
+        int id PK
+        int resume_id FK "REFERENCES RESUMES(id) ON DELETE CASCADE"
+        string name "NOT NULL"
+        string category "e.g., Technical, Soft, Tool, Language"
+        string proficiency_level "e.g., Beginner, Intermediate, Expert"
+    }
+
+    PROJECTS {
+        int id PK
+        int resume_id FK "REFERENCES RESUMES(id) ON DELETE CASCADE"
+        string title "NOT NULL"
+        text description
+        string technologies
+        string project_url
+    }
+
+    CERTIFICATIONS {
+        int id PK
+        int resume_id FK "REFERENCES RESUMES(id) ON DELETE CASCADE"
+        string name "NOT NULL"
+        string issuing_org
+        string issue_date
+        string cert_url
+    }

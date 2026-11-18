@@ -1,0 +1,117 @@
+classDiagram
+    %% Class Diagram for Online Resume Builder System
+    class User {
+        +int id
+        +string name
+        +string email
+        +string password_hash
+        +string phone
+        +string avatar_url
+        +datetime created_at
+        +register(name, email, password) bool
+        +authenticate(email, password) string
+        +updateProfile(profile_data) bool
+        +getResumes() List~Resume~
+    }
+
+    class Resume {
+        +int id
+        +int user_id
+        +string title
+        +string template_name
+        +string theme_color
+        +string font_family
+        +bool is_draft
+        +datetime created_at
+        +datetime updated_at
+        +create() Resume
+        +update(resume_data) Resume
+        +delete() bool
+        +duplicate() Resume
+    }
+
+    class PersonalInfo {
+        +int id
+        +int resume_id
+        +string full_name
+        +string email
+        +string phone
+        +string location
+        +string professional_title
+        +string summary
+        +string photo_url
+        +string linkedin_url
+        +string github_url
+        +string portfolio_url
+        +string twitter_url
+        +string leetcode_url
+        +validateMandatory() bool
+    }
+
+    class Education {
+        +int id
+        +int resume_id
+        +string degree
+        +string institution
+        +string location
+        +string start_year
+        +string end_year
+        +string cgpa
+        +string achievements
+    }
+
+    class Experience {
+        +int id
+        +int resume_id
+        +string job_title
+        +string company
+        +string location
+        +string start_date
+        +string end_date
+        +bool is_current
+        +string responsibilities
+    }
+
+    class Skill {
+        +int id
+        +int resume_id
+        +string name
+        +string category
+        +string proficiency_level
+    }
+
+    class Project {
+        +int id
+        +int resume_id
+        +string title
+        +string description
+        +string technologies
+        +string project_url
+    }
+
+    class Certification {
+        +int id
+        +int resume_id
+        +string name
+        +string issuing_org
+        +string issue_date
+        +string cert_url
+    }
+
+    class ResumeGenerator {
+        +Jinja2Engine templateEngine
+        +PDFConverter pdfConverter
+        +renderPreviewHTML(resume, template, theme) string
+        +exportToPDF(resume, template, theme) bytes
+        +validateDownloadCriteria(resume) ValidationResult
+    }
+
+    %% Relationships
+    User "1" *-- "0..*" Resume : owns
+    Resume "1" *-- "1" PersonalInfo : contains
+    Resume "1" *-- "0..*" Education : includes
+    Resume "1" *-- "0..*" Experience : includes
+    Resume "1" *-- "0..*" Skill : has
+    Resume "1" *-- "0..*" Project : showcases
+    Resume "1" *-- "0..*" Certification : includes
+    ResumeGenerator ..> Resume : processes

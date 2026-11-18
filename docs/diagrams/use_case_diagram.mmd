@@ -1,0 +1,57 @@
+flowchart TD
+    %% Use Case Diagram for Online Resume Builder with PDF Generation
+    %% Actors
+    subgraph Actors [System Actors]
+        JS((Job Seeker / Candidate))
+        SYS((System / Backend Engine))
+    end
+
+    subgraph SystemBoundary ["Online Resume Builder System"]
+        UC1([1. Register & Authenticate Account])
+        UC2([2. Manage Profile & Avatar Upload])
+        UC3([3. Create / Manage Multiple CVs CRUD])
+        UC4([4. Enter Resume Sections])
+        UC4A([Personal & Social Links])
+        UC4B([Education Background])
+        UC4C([Work Experience])
+        UC4D([Technical & Soft Skills])
+        UC4E([Projects & Certifications])
+        UC5([5. Auto-Save Draft to Database])
+        UC6([6. Validate Input Fields])
+        UC7([7. Select Template & Theme Palette])
+        UC8([8. Live Interactive Resume Preview])
+        UC9([9. Check Mandatory Fields])
+        UC10([10. Generate & Download PDF Document])
+        UC11([11. Database Persistence & Storage])
+    end
+
+    %% Connections for Job Seeker
+    JS --> UC1
+    JS --> UC2
+    JS --> UC3
+    JS --> UC4
+    JS --> UC7
+    JS --> UC8
+    JS --> UC10
+
+    %% Includes & Extends
+    UC4 --> UC4A
+    UC4 --> UC4B
+    UC4 --> UC4C
+    UC4 --> UC4D
+    UC4 --> UC4E
+
+    UC4 -.->|"<<include>>"| UC6
+    UC4 -.->|"<<include>>"| UC5
+    UC8 -.->|"<<extend>>"| UC7
+    UC10 -.->|"<<include>>"| UC9
+
+    %% System Engine connections
+    SYS --> UC5
+    SYS --> UC6
+    SYS --> UC9
+    SYS --> UC10
+    SYS --> UC11
+
+    UC5 --> UC11
+    UC10 --> UC11

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    @page {
+        size: a4 portrait;
+        margin: 1.2cm 1.2cm 1.2cm 1.2cm;
+    }
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        color: #1e293b;
+        font-size: 9.5pt;
+        line-height: 1.4;
+        margin: 0;
+        padding: 0;
+    }
+    .hero-banner {
+        background-color: #0f172a;
+        color: #ffffff;
+        padding: 16px 20px;
+        margin-bottom: 15px;
+        border-left: 6px solid {{ theme_color }};
+    }
+    .hero-name {
+        font-size: 22pt;
+        font-weight: bold;
+        color: #ffffff;
+        margin: 0;
+        letter-spacing: 0.5px;
+    }
+    .hero-role {
+        font-size: 12pt;
+        color: {{ theme_color }};
+        margin-top: 4px;
+        font-weight: bold;
+    }
+    .hero-contacts {
+        margin-top: 8px;
+        font-size: 8.5pt;
+        color: #cbd5e1;
+    }
+    .hero-item {
+        display: inline-block;
+        margin-right: 14px;
+    }
+    .section-head {
+        font-size: 11pt;
+        font-weight: bold;
+        color: {{ theme_color }};
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 4px;
+        margin-top: 14px;
+        margin-bottom: 8px;
+    }
+    .tech-pill {
+        display: inline-block;
+        background-color: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 8pt;
+        margin: 2px 4px 2px 0;
+        font-weight: bold;
+    }
+    .card-title {
+        font-size: 10pt;
+        font-weight: bold;
+        color: #0f172a;
+    }
+    .card-meta {
+        font-size: 8.5pt;
+        color: #64748b;
+    }
+    .card-body {
+        font-size: 8.5pt;
+        color: #334155;
+        margin-top: 3px;
+        margin-bottom: 6px;
+    }
+</style>
+</head>
+<body>
+
+<div class="hero-banner">
+    <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td valign="middle">
+                <div class="hero-name">{{ info.full_name or "Your Full Name" }}</div>
+                {% if info.professional_title %}
+                <div class="hero-role">{{ info.professional_title }}</div>
+                {% endif %}
+                <div class="hero-contacts">
+                    {% if info.email %}<span class="hero-item">{{ info.email }}</span>{% endif %}
+                    {% if info.phone %}<span class="hero-item">{{ info.phone }}</span>{% endif %}
+                    {% if info.location %}<span class="hero-item">{{ info.location }}</span>{% endif %}
+                </div>
+                {% if info.github_url or info.linkedin_url or info.portfolio_url or info.leetcode_url %}
+                <div class="hero-contacts" style="margin-top: 4px;">
+                    {% if info.github_url %}<span class="hero-item">GitHub: {{ info.github_url }}</span>{% endif %}
+                    {% if info.linkedin_url %}<span class="hero-item">LinkedIn: {{ info.linkedin_url }}</span>{% endif %}
+                    {% if info.portfolio_url %}<span class="hero-item">Portfolio: {{ info.portfolio_url }}</span>{% endif %}
+                    {% if info.leetcode_url %}<span class="hero-item">LeetCode: {{ info.leetcode_url }}</span>{% endif %}
+                </div>
+                {% endif %}
+            </td>
+            {% if info.photo_url %}
+            <td width="80" align="right" valign="middle">
+                <img src="{{ info.photo_url }}" style="width:70px; height:70px; border-radius:35px; border:2px solid {{ theme_color }};" />
+            </td>
+            {% endif %}
+        </tr>
+    </table>
+</div>
+
+{% if info.summary %}
+<div class="section-head">About Me</div>
+<div class="card-body" style="font-size:9.5pt; text-align: justify; margin-bottom:12px;">{{ info.summary }}</div>
+{% endif %}
+
+{% if skills and skills|length > 0 %}
+<div class="section-head">Core Stack & Skills</div>
+<div style="margin-bottom: 10px;">
+    {% for skill in skills %}
+    <span class="tech-pill">{{ skill.name }} &bull; {{ skill.proficiency_level }}</span>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if experiences and experiences|length > 0 %}
+<div class="section-head">Experience</div>
+{% for exp in experiences %}
+<div style="margin-bottom: 8px;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td class="card-title">{{ exp.job_title }} <span style="font-weight:normal; color:#64748b;">@ {{ exp.company }}</span></td>
+            <td align="right" class="card-meta">{{ exp.start_date }} &ndash; {% if exp.is_current %}Present{% else %}{{ exp.end_date or "Present" }}{% endif %}</td>
+        </tr>
+    </table>
+    {% if exp.responsibilities %}
+    <div class="card-body">{{ exp.responsibilities }}</div>
+    {% endif %}
+</div>
+{% endfor %}
+{% endif %}
+
+{% if projects and projects|length > 0 %}
+<div class="section-head">Featured Projects</div>
+{% for proj in projects %}
+<div style="margin-bottom: 8px;">
+    <div class="card-title">{{ proj.title }} {% if proj.technologies %}<span style="color:{{ theme_color }}; font-weight:normal; font-size:8pt;">[{{ proj.technologies }}]</span>{% endif %}</div>
+    {% if proj.project_url %}<div class="card-meta"><a href="{{ proj.project_url }}" style="color:{{ theme_color }};">{{ proj.project_url }}</a></div>{% endif %}
+    {% if proj.description %}
+    <div class="card-body">{{ proj.description }}</div>
+    {% endif %}
+</div>
+{% endfor %}
+{% endif %}
+
+{% if educations and educations|length > 0 %}
+<div class="section-head">Education</div>
+{% for edu in educations %}
+<div style="margin-bottom: 8px;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td class="card-title">{{ edu.degree }} <span style="font-weight:normal; color:#64748b;">&mdash; {{ edu.institution }}</span></td>
+            <td align="right" class="card-meta">{% if edu.start_year %}{{ edu.start_year }} &ndash; {% endif %}{{ edu.end_year }}</td>
+        </tr>
+    </table>
+    {% if edu.cgpa or edu.achievements %}
+    <div class="card-body">
+        {% if edu.cgpa %}<b>CGPA:</b> {{ edu.cgpa }} &nbsp; {% endif %}
+        {% if edu.achievements %}{{ edu.achievements }}{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+{% endif %}
+
+{% if certifications and certifications|length > 0 %}
+<div class="section-head">Certifications</div>
+{% for cert in certifications %}
+<div class="card-meta" style="margin-bottom: 4px;">
+    <b>{{ cert.name }}</b> &mdash; {{ cert.issuing_org }} ({{ cert.issue_date }})
+</div>
+{% endfor %}
+{% endif %}
+
+</body>
+</html>

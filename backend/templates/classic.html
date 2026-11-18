@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    @page {
+        size: a4 portrait;
+        margin: 1.5cm 1.5cm 1.5cm 1.5cm;
+    }
+    body {
+        font-family: Times, "Times New Roman", Georgia, serif;
+        color: #111111;
+        font-size: 10.5pt;
+        line-height: 1.4;
+        margin: 0;
+        padding: 0;
+    }
+    .header-box {
+        text-align: center;
+        border-bottom: 1.5px solid #333333;
+        padding-bottom: 10px;
+        margin-bottom: 14px;
+    }
+    .header-box h1 {
+        margin: 0 0 4px 0;
+        font-size: 20pt;
+        font-weight: bold;
+        letter-spacing: 1px;
+        color: {{ theme_color }};
+        text-transform: uppercase;
+    }
+    .header-box h3 {
+        margin: 0 0 6px 0;
+        font-size: 11pt;
+        font-weight: normal;
+        font-style: italic;
+        color: #444444;
+    }
+    .contact-line {
+        font-size: 9pt;
+        color: #333333;
+    }
+    .section-header {
+        font-size: 11pt;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: {{ theme_color }};
+        border-bottom: 1px solid #777777;
+        margin-top: 14px;
+        margin-bottom: 6px;
+        padding-bottom: 2px;
+    }
+    .summary-p {
+        font-size: 9.5pt;
+        text-align: justify;
+        margin: 4px 0 10px 0;
+    }
+    .item-table {
+        width: 100%;
+        margin-bottom: 7px;
+    }
+    .item-title {
+        font-size: 10pt;
+        font-weight: bold;
+    }
+    .item-sub {
+        font-size: 9.5pt;
+        font-style: italic;
+    }
+    .item-date {
+        text-align: right;
+        font-size: 9pt;
+        font-style: italic;
+    }
+    .item-desc {
+        font-size: 9pt;
+        margin-top: 2px;
+        color: #222222;
+    }
+    .skills-line {
+        font-size: 9pt;
+        margin-bottom: 4px;
+    }
+</style>
+</head>
+<body>
+
+<div class="header-box">
+    <h1>{{ info.full_name or "Your Full Name" }}</h1>
+    {% if info.professional_title %}
+    <h3>{{ info.professional_title }}</h3>
+    {% endif %}
+    <div class="contact-line">
+        {% if info.location %}{{ info.location }} &bull; {% endif %}
+        {% if info.phone %}{{ info.phone }} &bull; {% endif %}
+        {% if info.email %}{{ info.email }}{% endif %}
+    </div>
+    {% if info.linkedin_url or info.github_url or info.portfolio_url %}
+    <div class="contact-line" style="margin-top: 3px;">
+        {% if info.linkedin_url %}LinkedIn: {{ info.linkedin_url }} &bull; {% endif %}
+        {% if info.github_url %}GitHub: {{ info.github_url }} &bull; {% endif %}
+        {% if info.portfolio_url %}Portfolio: {{ info.portfolio_url }}{% endif %}
+    </div>
+    {% endif %}
+</div>
+
+{% if info.summary %}
+<div class="section-header">Professional Summary</div>
+<p class="summary-p">{{ info.summary }}</p>
+{% endif %}
+
+{% if experiences and experiences|length > 0 %}
+<div class="section-header">Professional Experience</div>
+{% for exp in experiences %}
+<table class="item-table" cellpadding="0" cellspacing="0">
+    <tr>
+        <td>
+            <span class="item-title">{{ exp.job_title }}</span> &mdash; <span class="item-sub">{{ exp.company }}</span>
+            {% if exp.location %}<span style="font-size:8.5pt;"> ({{ exp.location }})</span>{% endif %}
+        </td>
+        <td class="item-date">
+            {{ exp.start_date }} &ndash; {% if exp.is_current %}Present{% else %}{{ exp.end_date or "Present" }}{% endif %}
+        </td>
+    </tr>
+    {% if exp.responsibilities %}
+    <tr>
+        <td colspan="2" class="item-desc">{{ exp.responsibilities }}</td>
+    </tr>
+    {% endif %}
+</table>
+{% endfor %}
+{% endif %}
+
+{% if educations and educations|length > 0 %}
+<div class="section-header">Education</div>
+{% for edu in educations %}
+<table class="item-table" cellpadding="0" cellspacing="0">
+    <tr>
+        <td>
+            <span class="item-title">{{ edu.degree }}</span> &mdash; <span class="item-sub">{{ edu.institution }}</span>
+            {% if edu.location %}<span style="font-size:8.5pt;"> ({{ edu.location }})</span>{% endif %}
+        </td>
+        <td class="item-date">
+            {% if edu.start_year %}{{ edu.start_year }} &ndash; {% endif %}{{ edu.end_year }}
+        </td>
+    </tr>
+    {% if edu.cgpa or edu.achievements %}
+    <tr>
+        <td colspan="2" class="item-desc">
+            {% if edu.cgpa %}<b>CGPA:</b> {{ edu.cgpa }} &nbsp; {% endif %}
+            {% if edu.achievements %}{{ edu.achievements }}{% endif %}
+        </td>
+    </tr>
+    {% endif %}
+</table>
+{% endfor %}
+{% endif %}
+
+{% if skills and skills|length > 0 %}
+<div class="section-header">Skills & Competencies</div>
+<div class="skills-line">
+    {% for skill in skills %}
+    <b>{{ skill.name }}</b> ({{ skill.proficiency_level }}){% if not loop.last %} &bull; {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if projects and projects|length > 0 %}
+<div class="section-header">Projects</div>
+{% for proj in projects %}
+<table class="item-table" cellpadding="0" cellspacing="0">
+    <tr>
+        <td>
+            <span class="item-title">{{ proj.title }}</span>
+            {% if proj.technologies %}<span style="font-size:8.5pt; font-style:italic;"> &mdash; {{ proj.technologies }}</span>{% endif %}
+        </td>
+        <td class="item-date">
+            {% if proj.project_url %}<a href="{{ proj.project_url }}" style="color:{{ theme_color }};">Link</a>{% endif %}
+        </td>
+    </tr>
+    {% if proj.description %}
+    <tr>
+        <td colspan="2" class="item-desc">{{ proj.description }}</td>
+    </tr>
+    {% endif %}
+</table>
+{% endfor %}
+{% endif %}
+
+{% if certifications and certifications|length > 0 %}
+<div class="section-header">Honors & Certifications</div>
+{% for cert in certifications %}
+<table class="item-table" cellpadding="0" cellspacing="0">
+    <tr>
+        <td>
+            <span class="item-title">{{ cert.name }}</span>
+            {% if cert.issuing_org %} &mdash; <span class="item-sub">{{ cert.issuing_org }}</span>{% endif %}
+        </td>
+        <td class="item-date">{{ cert.issue_date }}</td>
+    </tr>
+</table>
+{% endfor %}
+{% endif %}
+
+</body>
+</html>

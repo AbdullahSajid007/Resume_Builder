@@ -1,0 +1,35 @@
+flowchart TD
+    Start([Start: Candidate visits Application]) --> OpenApp[Load Homepage / Dashboard]
+    OpenApp --> CheckAuth{Is User Logged In?}
+    
+    CheckAuth -- No --> AuthChoice{Login or Guest?}
+    AuthChoice -- Login/Register --> AuthForm[Submit Credentials / Token Generated]
+    AuthChoice -- Guest / Start --> InitDraft[Initialize Local/Server Draft Session]
+    AuthForm --> UserDash[Access User Resumes Dashboard]
+    
+    UserDash --> ResumeAction{Action?}
+    ResumeAction -- Create New --> NewResume[Create New Resume Document]
+    ResumeAction -- Edit Existing --> LoadResume[Fetch Resume from DB]
+    InitDraft --> NewResume
+    
+    NewResume --> FormInput[Enter/Edit Details: Personal, Education, Exp, Skills, Links]
+    LoadResume --> FormInput
+
+    FormInput --> AutoSaveTrigger[Typing / Input Event Detected]
+    AutoSaveTrigger --> AutoSaveDB[(Auto-Save Draft to Database/Session)]
+    AutoSaveDB --> RealtimePreview[Render Live Preview Pane]
+
+    FormInput --> UserSelectStyle[Select Template: Modern, Classic, Executive, Creative & Theme Color]
+    UserSelectStyle --> RealtimePreview
+
+    RealtimePreview --> DownloadClick[Candidate clicks 'Download PDF']
+    DownloadClick --> ValidateReq{Are Mandatory Fields Filled?<br/>Full Name, Email, Phone, Title}
+
+    ValidateReq -- No --> ShowValidationError[Display Field Highlights & Error Toast]
+    ShowValidationError --> FormInput
+
+    ValidateReq -- Yes --> ServerRequest[POST /api/resumes/export-pdf]
+    ServerRequest --> JinjaRender[Jinja2 Engine compiles HTML + Dynamic Theme/CSS]
+    JinjaRender --> PDFEngine[PDF Converter generates PDF stream]
+    PDFEngine --> DeliverFile[Browser Downloads Generated PDF File]
+    DeliverFile --> EndSuccess([End: Successful PDF Export])

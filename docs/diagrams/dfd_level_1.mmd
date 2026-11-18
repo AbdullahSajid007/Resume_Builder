@@ -1,0 +1,51 @@
+flowchart TD
+    %% DFD Level 1 - Detailed Functional Breakdown
+    Candidate[("Job Seeker / Candidate")]
+
+    subgraph Processes ["Functional Processes"]
+        P1["1.0 Authenticate & Manage Session"]
+        P2["2.0 Validate & Auto-Save Input Data"]
+        P3["3.0 Manage Resumes & Profiles CRUD"]
+        P4["4.0 Render Live HTML Preview (Jinja2)"]
+        P5["5.0 Generate & Stream PDF"]
+    end
+
+    subgraph DataStores ["Data Stores"]
+        D1[("D1: Users Store")]
+        D2[("D2: Resumes & Drafts Store")]
+        D3[("D3: Resume Sections Details")]
+        D4[("D4: Uploaded Avatars / Assets")]
+    end
+
+    %% Process 1 flows
+    Candidate -->|"Credentials (Email, Password)"| P1
+    P1 <-->|"Verify / Store Account"| D1
+    P1 -->|"Auth Token & Status"| Candidate
+
+    %% Process 2 flows
+    Candidate -->|"Form Inputs (Real-time Typing)"| P2
+    P2 -->|"Field Validation Errors"| Candidate
+    P2 -->|"Valid Draft Data"| D2
+    P2 -->|"Structured Section Entities"| D3
+    Candidate -->|"Avatar Image File"| P2
+    P2 -->|"Image Storage"| D4
+
+    %% Process 3 flows
+    Candidate -->|"Create / Edit / Duplicate / Delete CV"| P3
+    P3 <-->|"Fetch / Mutate Resumes"| D2
+    P3 <-->|"Fetch / Mutate Details"| D3
+    P3 -->|"Resume List & Active CV Data"| Candidate
+
+    %% Process 4 flows
+    Candidate -->|"Template & Theme Selection"| P4
+    D2 -->|"Resume Metadata"| P4
+    D3 -->|"Section Content"| P4
+    D4 -->|"Avatar Asset"| P4
+    P4 -->|"Live Formatted HTML Preview"| Candidate
+
+    %% Process 5 flows
+    Candidate -->|"Trigger PDF Download"| P5
+    P5 -->|"Validate Mandatory Constraints"| P5
+    D2 -->|"Latest Resume State"| P5
+    D3 -->|"Complete Sections"| P5
+    P5 -->|"Rendered Jinja2 Output to PDF Stream"| Candidate
