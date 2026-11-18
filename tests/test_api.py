@@ -12,7 +12,8 @@ from backend.schemas import (
 from backend.main import (
     health_check, register, login, create_resume, update_resume,
     delete_resume, duplicate_resume, autosave_resume, validate_criteria,
-    export_pdf, upload_photo, seed_sample_data
+    export_pdf, upload_photo, seed_sample_data, get_demo_users,
+    demo_login, DemoLoginRequest
 )
 
 def get_test_db():
@@ -279,3 +280,23 @@ def test_tc08_photo_upload():
     assert "url" in result
     assert result["url"].startswith("/uploads/")
     assert result["filename"].endswith(".jpg")
+
+
+def test_tc09_multi_persona_demo_login():
+    db = get_test_db()
+    demos = get_demo_users()
+    assert len(demos) == 4
+
+    for persona in demos:
+        req = DemoLoginRequest(email=persona["email"])
+        res = demo_login(req, db=db)
+        assert res["access_token"] is not None
+        assert res["user"].email == persona["email"].lower()
+        assert res["user"].name == persona["name"]
+
+        # Verify persona has pre-populated resume in database
+        resumes = db.query(Resume).filter(Resume.user_id == res["user"].id).all()
+        assert len(resumes) >= 1
+        assert resumes[0].template_name == persona["template_name"]
+    db.close()
+

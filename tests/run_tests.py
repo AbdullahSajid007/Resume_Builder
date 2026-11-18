@@ -12,7 +12,8 @@ from tests.test_api import (
     test_tc05_mandatory_validation,
     test_tc06_pdf_export_all_templates,
     test_tc07_crud_duplicate_and_delete,
-    test_tc08_photo_upload
+    test_tc08_photo_upload,
+    test_tc09_multi_persona_demo_login
 )
 
 def run_all_tests():
@@ -29,6 +30,7 @@ def run_all_tests():
         ("TC-06: PDF Generation for All 4 Design Templates", test_tc06_pdf_export_all_templates),
         ("TC-07: Resume CRUD Operations (Duplicate & Delete)", test_tc07_crud_duplicate_and_delete),
         ("TC-08: Profile Photo / Avatar Upload Engine", test_tc08_photo_upload),
+        ("TC-09: Multi-Persona Demo Login & Data Seeding", test_tc09_multi_persona_demo_login),
     ]
 
     passed = 0

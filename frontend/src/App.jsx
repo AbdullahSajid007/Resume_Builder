@@ -5,10 +5,15 @@ import PreviewPane from './components/PreviewPane';
 import AuthModal from './components/AuthModal';
 import ResumeManagerModal from './components/ResumeManagerModal';
 import ProfileModal from './components/ProfileModal';
+import LoginPage from './components/LoginPage';
 import { initialEmptyResume, sampleCandidateResume } from './sampleData';
 import './App.css';
 
 export default function App() {
+  const [currentView, setCurrentView] = useState(() => {
+    return window.location.pathname === '/login' ? 'login' : 'builder';
+  });
+
   const [resume, setResume] = useState(() => {
     const saved = localStorage.getItem('local_resume_draft');
     if (saved) {
@@ -40,6 +45,23 @@ export default function App() {
   // Auto-save debounce timer ref
   const autoSaveTimerRef = useRef(null);
 
+  // Browser navigation sync
+  const navigateView = (view) => {
+    setCurrentView(view);
+    const targetPath = view === 'login' ? '/login' : '/';
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState(null, '', targetPath);
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentView(window.location.pathname === '/login' ? 'login' : 'builder');
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   // Validate active user token on mount
   useEffect(() => {
     if (token) {
@@ -55,7 +77,6 @@ export default function App() {
         localStorage.setItem('auth_user', JSON.stringify(userData));
       })
       .catch(() => {
-        // clear expired session
         setUser(null);
         setToken('');
         localStorage.removeItem('auth_token');
@@ -76,11 +97,11 @@ export default function App() {
 
   // Persistent Auto-Save Effect (Local Storage + Backend DB autosave)
   useEffect(() => {
-    // 1. Instant local persistence
+    if (currentView !== 'builder') return;
+
     localStorage.setItem('local_resume_draft', JSON.stringify(resume));
     setSaveStatus('saving');
 
-    // 2. Debounced server persistence
     if (autoSaveTimerRef.current) {
       clearTimeout(autoSaveTimerRef.current);
     }
@@ -115,12 +136,18 @@ export default function App() {
     return () => {
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     };
-  }, [resume, token, activeResumeId]);
+  }, [resume, token, activeResumeId, currentView]);
 
   // Auth Success Handler
-  const handleAuthSuccess = (newUser, newToken) => {
+  const handleAuthSuccess = (newUser, newToken, loadedResume = null) => {
     setUser(newUser);
     setToken(newToken);
+    if (loadedResume) {
+      setResume(loadedResume);
+      setActiveResumeId(loadedResume.id);
+      localStorage.setItem('active_resume_id', loadedResume.id.toString());
+      localStorage.setItem('local_resume_draft', JSON.stringify(loadedResume));
+    }
   };
 
   const handleLogout = () => {
@@ -199,51 +226,59 @@ export default function App() {
     }
   };
 
-  // Print Handler
   const handlePrint = () => {
     window.print();
   };
 
   return (
     <div className="app-layout">
-      {/* Top Navbar */}
-      <Navbar
-        resume={resume}
-        setResume={setResume}
-        saveStatus={saveStatus}
-        user={user}
-        onOpenAuth={() => setAuthModalOpen(true)}
-        onLogout={handleLogout}
-        onOpenResumes={() => setResumesModalOpen(true)}
-        onOpenProfile={() => setProfileModalOpen(true)}
-        onDownloadPdf={handleDownloadPdf}
-        onPrint={handlePrint}
-        onLoadSample={handleLoadSample}
-        isDownloading={isDownloading}
-        validationError={missingFields.length > 0}
-      />
-
-      {/* Main Split-Screen Workspace */}
-      <main className="workspace-main">
-        {/* Left Side: Form Editor Pane */}
-        <section className="pane-left">
-          <EditorPane
+      {currentView === 'login' ? (
+        <LoginPage
+          onAuthSuccess={handleAuthSuccess}
+          onNavigateToBuilder={() => navigateView('builder')}
+        />
+      ) : (
+        <>
+          {/* Top Navbar */}
+          <Navbar
             resume={resume}
             setResume={setResume}
-            missingFields={missingFields}
-          />
-        </section>
-
-        {/* Right Side: Live Formatted Preview Pane */}
-        <section className="pane-right">
-          <PreviewPane
-            resume={resume}
-            missingFields={missingFields}
+            saveStatus={saveStatus}
+            user={user}
+            onOpenAuth={() => navigateView('login')}
+            onLogout={handleLogout}
+            onOpenResumes={() => setResumesModalOpen(true)}
+            onOpenProfile={() => setProfileModalOpen(true)}
             onDownloadPdf={handleDownloadPdf}
+            onPrint={handlePrint}
+            onLoadSample={handleLoadSample}
             isDownloading={isDownloading}
+            validationError={missingFields.length > 0}
           />
-        </section>
-      </main>
+
+          {/* Main Split-Screen Workspace */}
+          <main className="workspace-main">
+            {/* Left Side: Form Editor Pane */}
+            <section className="pane-left">
+              <EditorPane
+                resume={resume}
+                setResume={setResume}
+                missingFields={missingFields}
+              />
+            </section>
+
+            {/* Right Side: Live Formatted Preview Pane */}
+            <section className="pane-right">
+              <PreviewPane
+                resume={resume}
+                missingFields={missingFields}
+                onDownloadPdf={handleDownloadPdf}
+                isDownloading={isDownloading}
+              />
+            </section>
+          </main>
+        </>
+      )}
 
       {/* Modals */}
       <AuthModal

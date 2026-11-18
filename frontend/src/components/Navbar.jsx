@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   FileText, Download, Printer, Save, CheckCircle, Clock, 
-  FolderOpen, User, LogIn, LogOut, Sparkles, AlertCircle 
+  FolderOpen, User, LogIn, LogOut, Sparkles, Users 
 } from 'lucide-react';
 
 export default function Navbar({
@@ -59,10 +59,10 @@ export default function Navbar({
         <button
           className="nav-btn btn-secondary"
           onClick={onLoadSample}
-          title="Pre-populate with sample candidate information"
+          title="Reset to default sample candidate information"
         >
           <Sparkles className="w-4 h-4 text-amber-500" />
-          <span>Load Sample</span>
+          <span>Sample CV</span>
         </button>
 
         {user && (
@@ -107,6 +107,13 @@ export default function Navbar({
               </div>
               <span className="user-name-text">{user.name.split(' ')[0]}</span>
             </button>
+            <button
+              className="switch-user-btn"
+              onClick={onOpenAuth}
+              title="Switch user account or demo persona"
+            >
+              <Users className="w-3.5 h-3.5" />
+            </button>
             <button 
               className="logout-icon-btn" 
               onClick={onLogout} 
@@ -119,10 +126,10 @@ export default function Navbar({
           <button
             className="nav-btn btn-auth"
             onClick={onOpenAuth}
-            title="Sign in or create account to save multiple CVs"
+            title="Login or explore 1-click Demo Profiles"
           >
-            <LogIn className="w-4 h-4" />
-            <span>Sign In / Register</span>
+            <LogIn className="w-4 h-4 mr-1" />
+            <span>Login / Demo Users</span>
           </button>
         )}
       </div>

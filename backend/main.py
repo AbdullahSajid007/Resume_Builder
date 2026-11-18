@@ -4,6 +4,7 @@ import uuid
 from typing import List, Optional
 from contextlib import asynccontextmanager
 
+from pydantic import BaseModel
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -47,14 +48,298 @@ def find_static_dir():
     return None
 
 def seed_sample_data(db: Session):
-    """Seed initial demo user and comprehensive sample resume for testing."""
-    existing_user = db.query(User).filter(User.email == "demo@candidate.com").first()
-    if not existing_user:
+    """Seed initial demo users and comprehensive sample resumes for testing and evaluation."""
+    demo_profiles = [
+        {
+            "name": "Alex Morgan",
+            "email": "demo@candidate.com",
+            "phone": "+1 (555) 019-2834",
+            "role": "Senior Full-Stack & Cloud Systems Architect",
+            "template": "modern",
+            "theme": "#1e3a8a",
+            "summary": "Dynamic software engineer with 5+ years building scalable web architectures, microservices, and reactive SPAs. Proven record leading distributed teams and driving 99.99% system availability.",
+            "linkedin": "linkedin.com/in/alexmorgan-dev",
+            "github": "github.com/alexmorgan-code",
+            "portfolio": "alexmorgan.dev",
+            "location": "San Francisco, CA / Remote",
+            "educations": [
+                {
+                    "degree": "B.Sc. in Computer Science & Engineering",
+                    "institution": "Metropolitan University",
+                    "location": "San Francisco, CA",
+                    "start_year": "2017",
+                    "end_year": "2021",
+                    "cgpa": "3.92 / 4.00",
+                    "achievements": "Dean's List for Academic Excellence, Capstone Award for AI-driven Career Platform."
+                }
+            ],
+            "experiences": [
+                {
+                    "job_title": "Lead Backend Engineer",
+                    "company": "Nexus Cloud Innovations",
+                    "location": "San Francisco, CA",
+                    "start_date": "2023",
+                    "end_date": "Present",
+                    "is_current": True,
+                    "responsibilities": "Architected high-throughput RESTful & GraphQL microservices with FastAPI and PostgreSQL, slashing API p99 latency by 35%. Spearheaded CI/CD pipelines on Render and AWS."
+                },
+                {
+                    "job_title": "Full-Stack Developer",
+                    "company": "Apex Technologies Inc.",
+                    "location": "Austin, TX",
+                    "start_date": "2021",
+                    "end_date": "2023",
+                    "is_current": False,
+                    "responsibilities": "Engineered responsive client dashboards with React and Redux. Integrated automated PDF export engines and secure payment gateways handling 100k+ transactions."
+                }
+            ],
+            "skills": [
+                ("Python & FastAPI", "Technical", "Expert"),
+                ("React & TypeScript", "Technical", "Advanced"),
+                ("PostgreSQL & SQLAlchemy", "Technical", "Expert"),
+                ("Docker & Cloud Hosting", "Technical", "Advanced"),
+                ("Agile Leadership", "Soft", "Expert"),
+                ("System Design & Architecture", "Technical", "Expert")
+            ],
+            "projects": [
+                {
+                    "title": "Distributed Real-Time Analytics Engine",
+                    "description": "Built real-time streaming pipeline processing 10,000 events/sec with automated report exports.",
+                    "technologies": "Python, FastAPI, Kafka, Redis, PostgreSQL",
+                    "project_url": "https://github.com/alexmorgan-code/distributed-analytics"
+                }
+            ],
+            "certifications": [
+                {
+                    "name": "AWS Certified Solutions Architect – Associate",
+                    "issuing_org": "Amazon Web Services",
+                    "issue_date": "2023",
+                    "cert_url": "https://aws.amazon.com/certification"
+                }
+            ]
+        },
+        {
+            "name": "Sarah Jenkins",
+            "email": "sarah.jenkins@demo.com",
+            "phone": "+1 (555) 234-8901",
+            "role": "Senior Technical Product Manager",
+            "template": "executive",
+            "theme": "#065f46",
+            "summary": "Customer-obsessed Product Manager with 7+ years driving cross-functional engineering, UX, and data science teams to deliver market-leading enterprise SaaS and AI applications.",
+            "linkedin": "linkedin.com/in/sarahjenkins-pm",
+            "github": "",
+            "portfolio": "sarahjenkins.product",
+            "location": "Seattle, WA / Remote",
+            "educations": [
+                {
+                    "degree": "MBA in Technology Strategy",
+                    "institution": "Stanford Graduate School of Business",
+                    "location": "Stanford, CA",
+                    "start_year": "2019",
+                    "end_year": "2021",
+                    "cgpa": "3.95 / 4.00",
+                    "achievements": "Leadership Fellow, Venture Challenge 1st Place Winner."
+                },
+                {
+                    "degree": "B.S. in Information Systems",
+                    "institution": "University of Washington",
+                    "location": "Seattle, WA",
+                    "start_year": "2013",
+                    "end_year": "2017",
+                    "cgpa": "3.88 / 4.00",
+                    "achievements": "Cum Laude Honors."
+                }
+            ],
+            "experiences": [
+                {
+                    "job_title": "Lead Product Manager - AI Workflows",
+                    "company": "FinTech Global Innovations",
+                    "location": "Seattle, WA",
+                    "start_date": "2021",
+                    "end_date": "Present",
+                    "is_current": True,
+                    "responsibilities": "Managed multi-million dollar product roadmap from ideation to launch, boosting user retention by 28% and expanding ARR by $4.2M."
+                },
+                {
+                    "job_title": "Senior Technical Product Manager",
+                    "company": "CloudScale Platforms",
+                    "location": "San Francisco, CA",
+                    "start_date": "2017",
+                    "end_date": "2019",
+                    "is_current": False,
+                    "responsibilities": "Collaborated with engineering to define API specifications, reducing customer onboarding churn by 40%."
+                }
+            ],
+            "skills": [
+                ("Product Roadmap & Strategy", "Technical", "Expert"),
+                ("Agile & Scrum Leadership", "Soft", "Expert"),
+                ("Data & User Analytics (Mixpanel/SQL)", "Technical", "Advanced"),
+                ("Stakeholder Management", "Soft", "Expert"),
+                ("Go-To-Market Execution", "Technical", "Advanced")
+            ],
+            "projects": [
+                {
+                    "title": "Enterprise AI Copilot Suite",
+                    "description": "Led discovery, prototyping, and beta rollout of LLM-assisted financial audit workspace.",
+                    "technologies": "Product Strategy, Jira, Figma, Mixpanel",
+                    "project_url": "https://sarahjenkins.product/copilot"
+                }
+            ],
+            "certifications": [
+                {
+                    "name": "Certified Scrum Product Owner (CSPO)",
+                    "issuing_org": "Scrum Alliance",
+                    "issue_date": "2022",
+                    "cert_url": "https://scrumalliance.org"
+                }
+            ]
+        },
+        {
+            "name": "David Chen",
+            "email": "david.chen@demo.com",
+            "phone": "+1 (555) 345-6789",
+            "role": "Lead UI/UX & Product Designer",
+            "template": "creative",
+            "theme": "#581c87",
+            "summary": "Award-winning product designer crafting clean, accessible, and delightful digital experiences. Specialized in comprehensive design systems, user journey mapping, and high-fidelity interaction prototypes.",
+            "linkedin": "linkedin.com/in/davidchen-design",
+            "github": "github.com/davidchen-design",
+            "portfolio": "davidchen.design",
+            "location": "New York, NY",
+            "educations": [
+                {
+                    "degree": "B.F.A. in Interaction Design",
+                    "institution": "Rhode Island School of Design (RISD)",
+                    "location": "Providence, RI",
+                    "start_year": "2016",
+                    "end_year": "2020",
+                    "cgpa": "3.91 / 4.00",
+                    "achievements": "Departmental Honors, Outstanding Senior Exhibition Award."
+                }
+            ],
+            "experiences": [
+                {
+                    "job_title": "Lead Product Designer",
+                    "company": "CreativeStudio NY",
+                    "location": "New York, NY",
+                    "start_date": "2022",
+                    "end_date": "Present",
+                    "is_current": True,
+                    "responsibilities": "Built and maintained multi-brand design system in Figma adopted by 40+ designers and 120+ engineers. Improved design handoff velocity by 50%."
+                },
+                {
+                    "job_title": "UI/UX Designer",
+                    "company": "PixelCraft Interactive",
+                    "location": "Brooklyn, NY",
+                    "start_date": "2020",
+                    "end_date": "2022",
+                    "is_current": False,
+                    "responsibilities": "Conducted 60+ user interviews and usability testing sessions; redesigned mobile banking application achieving a 4.8 App Store rating."
+                }
+            ],
+            "skills": [
+                ("Figma & Design Systems", "Technical", "Expert"),
+                ("User Research & Usability Testing", "Technical", "Expert"),
+                ("Prototyping & Micro-interactions", "Technical", "Advanced"),
+                ("Accessibility (WCAG 2.1)", "Technical", "Expert"),
+                ("HTML/CSS/Tailwind Basics", "Technical", "Intermediate")
+            ],
+            "projects": [
+                {
+                    "title": "Aura Design System 2.0",
+                    "description": "Comprehensive token-based design library with 300+ accessible components for web and mobile.",
+                    "technologies": "Figma, Tokens Studio, Storybook",
+                    "project_url": "https://davidchen.design/aura"
+                }
+            ],
+            "certifications": [
+                {
+                    "name": "Nielsen Norman Group UX Master Certified",
+                    "issuing_org": "Nielsen Norman Group",
+                    "issue_date": "2022",
+                    "cert_url": "https://nngroup.com"
+                }
+            ]
+        },
+        {
+            "name": "Emily Taylor",
+            "email": "emily.taylor@demo.com",
+            "phone": "+1 (555) 456-7890",
+            "role": "Junior Software Engineer",
+            "template": "classic",
+            "theme": "#881337",
+            "summary": "Recent Summa Cum Laude Computer Science graduate with strong foundations in object-oriented programming, data structures, algorithms, and full-stack software development. Passionate about writing clean, testable code.",
+            "linkedin": "linkedin.com/in/emilytaylor-cs",
+            "github": "github.com/emilytaylor-code",
+            "portfolio": "emilytaylor.dev",
+            "location": "Boston, MA",
+            "educations": [
+                {
+                    "degree": "B.Sc. in Computer Science (Summa Cum Laude)",
+                    "institution": "University of Massachusetts Amherst",
+                    "location": "Amherst, MA",
+                    "start_year": "2020",
+                    "end_year": "2024",
+                    "cgpa": "3.98 / 4.00",
+                    "achievements": "Chancellor's Talent Award, Outstanding Undergraduate Researcher, ACM Student Chapter President."
+                }
+            ],
+            "experiences": [
+                {
+                    "job_title": "Software Engineering Intern",
+                    "company": "TechLabs Boston",
+                    "location": "Boston, MA",
+                    "start_date": "Jun 2023",
+                    "end_date": "Aug 2023",
+                    "is_current": False,
+                    "responsibilities": "Developed automated integration test suite in Python/PyTest, increasing code coverage from 68% to 92%. Refactored REST endpoints for 20% faster response times."
+                },
+                {
+                    "job_title": "Undergraduate Teaching Assistant",
+                    "company": "UMass College of Information & Computer Sciences",
+                    "location": "Amherst, MA",
+                    "start_date": "Sep 2022",
+                    "end_date": "May 2024",
+                    "is_current": False,
+                    "responsibilities": "Mentored 120+ students in Data Structures and Algorithms; hosted weekly code labs and graded programming assignments."
+                }
+            ],
+            "skills": [
+                ("Java & Python", "Technical", "Advanced"),
+                ("Data Structures & Algorithms", "Technical", "Expert"),
+                ("SQL & Database Design", "Technical", "Intermediate"),
+                ("Git & GitHub Collaboration", "Tool", "Advanced"),
+                ("Technical Writing & Mentoring", "Soft", "Expert")
+            ],
+            "projects": [
+                {
+                    "title": "Autonomous Drone Pathfinding Visualizer",
+                    "description": "Interactive visualizer implementing A* and Dijkstra's algorithm for 3D dynamic obstacle avoidance.",
+                    "technologies": "Java, JavaFX, Graph Algorithms",
+                    "project_url": "https://github.com/emilytaylor-code/drone-pathfinder"
+                }
+            ],
+            "certifications": [
+                {
+                    "name": "Oracle Certified Associate, Java SE Programmer",
+                    "issuing_org": "Oracle",
+                    "issue_date": "2023",
+                    "cert_url": "https://oracle.com"
+                }
+            ]
+        }
+    ]
+
+    for p in demo_profiles:
+        existing = db.query(User).filter(User.email == p["email"]).first()
+        if existing:
+            continue
+
         demo_user = User(
-            name="Alex Morgan",
-            email="demo@candidate.com",
+            name=p["name"],
+            email=p["email"],
             password_hash=hash_password("DemoPassword123!"),
-            phone="+1 (555) 019-2834",
+            phone=p["phone"],
             avatar_url=""
         )
         db.add(demo_user)
@@ -63,9 +348,9 @@ def seed_sample_data(db: Session):
 
         sample_resume = Resume(
             user_id=demo_user.id,
-            title="Senior Full Stack Software Engineer",
-            template_name="modern",
-            theme_color="#1e3a8a",
+            title=f"{p['name']} - {p['role']}",
+            template_name=p["template"],
+            theme_color=p["theme"],
             font_family="Inter",
             is_draft=False
         )
@@ -75,82 +360,70 @@ def seed_sample_data(db: Session):
 
         personal = PersonalInfo(
             resume_id=sample_resume.id,
-            full_name="Alex Morgan",
-            email="demo@candidate.com",
-            phone="+1 (555) 019-2834",
-            location="San Francisco, CA / Remote",
-            professional_title="Senior Full-Stack & Cloud Systems Architect",
-            summary="Dynamic software engineer with 5+ years building scalable web architectures, microservices, and reactive SPAs. Proven record leading distributed teams and driving 99.99% system availability.",
+            full_name=p["name"],
+            email=p["email"],
+            phone=p["phone"],
+            location=p["location"],
+            professional_title=p["role"],
+            summary=p["summary"],
             photo_url="",
-            linkedin_url="linkedin.com/in/alexmorgan-dev",
-            github_url="github.com/alexmorgan-code",
-            portfolio_url="alexmorgan.dev",
-            twitter_url="x.com/alexmorgan_dev",
-            leetcode_url="leetcode.com/alexmorgan"
+            linkedin_url=p["linkedin"],
+            github_url=p["github"],
+            portfolio_url=p["portfolio"],
+            twitter_url="",
+            leetcode_url=""
         )
         db.add(personal)
 
-        edu1 = Education(
-            resume_id=sample_resume.id,
-            degree="B.Sc. in Computer Science & Engineering",
-            institution="Metropolitan University",
-            location="San Francisco, CA",
-            start_year="2017",
-            end_year="2021",
-            cgpa="3.92 / 4.00",
-            achievements="Dean's List for Academic Excellence, Capstone Award for AI-driven Career Platform."
-        )
-        db.add(edu1)
+        for edu in p["educations"]:
+            db.add(Education(
+                resume_id=sample_resume.id,
+                degree=edu["degree"],
+                institution=edu["institution"],
+                location=edu["location"],
+                start_year=edu.get("start_year", ""),
+                end_year=edu["end_year"],
+                cgpa=edu.get("cgpa", ""),
+                achievements=edu.get("achievements", "")
+            ))
 
-        exp1 = Experience(
-            resume_id=sample_resume.id,
-            job_title="Lead Backend Engineer",
-            company="Nexus Cloud Innovations",
-            location="San Francisco, CA",
-            start_date="2023",
-            end_date="Present",
-            is_current=True,
-            responsibilities="Architected high-throughput RESTful & GraphQL microservices with FastAPI and PostgreSQL, slashing API p99 latency by 35%. Spearheaded CI/CD pipelines on Render and AWS."
-        )
-        exp2 = Experience(
-            resume_id=sample_resume.id,
-            job_title="Full-Stack Developer",
-            company="Apex Technologies Inc.",
-            location="Austin, TX",
-            start_date="2021",
-            end_date="2023",
-            is_current=False,
-            responsibilities="Engineered responsive client dashboards with React and Redux. Integrated automated PDF export engines and secure payment gateways handling 100k+ transactions."
-        )
-        db.add_all([exp1, exp2])
+        for exp in p["experiences"]:
+            db.add(Experience(
+                resume_id=sample_resume.id,
+                job_title=exp["job_title"],
+                company=exp["company"],
+                location=exp["location"],
+                start_date=exp["start_date"],
+                end_date=exp["end_date"],
+                is_current=exp["is_current"],
+                responsibilities=exp["responsibilities"]
+            ))
 
-        skills = [
-            Skill(resume_id=sample_resume.id, name="Python & FastAPI", category="Technical", proficiency_level="Expert"),
-            Skill(resume_id=sample_resume.id, name="React & TypeScript", category="Technical", proficiency_level="Advanced"),
-            Skill(resume_id=sample_resume.id, name="PostgreSQL & SQLAlchemy", category="Technical", proficiency_level="Expert"),
-            Skill(resume_id=sample_resume.id, name="Docker & Cloud Hosting", category="Technical", proficiency_level="Advanced"),
-            Skill(resume_id=sample_resume.id, name="Agile Leadership", category="Soft", proficiency_level="Expert"),
-            Skill(resume_id=sample_resume.id, name="System Design & Modeling", category="Technical", proficiency_level="Expert")
-        ]
-        db.add_all(skills)
+        for s_name, s_cat, s_prof in p["skills"]:
+            db.add(Skill(
+                resume_id=sample_resume.id,
+                name=s_name,
+                category=s_cat,
+                proficiency_level=s_prof
+            ))
 
-        proj1 = Project(
-            resume_id=sample_resume.id,
-            title="Distributed Analytics Engine",
-            description="Built real-time streaming pipeline processing 10,000 events/sec with automated report exports.",
-            technologies="Python, FastAPI, Kafka, Redis, PostgreSQL",
-            project_url="https://github.com/alexmorgan-code/distributed-analytics"
-        )
-        db.add(proj1)
+        for proj in p["projects"]:
+            db.add(Project(
+                resume_id=sample_resume.id,
+                title=proj["title"],
+                description=proj["description"],
+                technologies=proj["technologies"],
+                project_url=proj["project_url"]
+            ))
 
-        cert1 = Certification(
-            resume_id=sample_resume.id,
-            name="AWS Certified Solutions Architect – Associate",
-            issuing_org="Amazon Web Services",
-            issue_date="2023",
-            cert_url="https://aws.amazon.com/certification"
-        )
-        db.add(cert1)
+        for cert in p["certifications"]:
+            db.add(Certification(
+                resume_id=sample_resume.id,
+                name=cert["name"],
+                issuing_org=cert["issuing_org"],
+                issue_date=cert["issue_date"],
+                cert_url=cert["cert_url"]
+            ))
 
         db.commit()
 
@@ -213,6 +486,80 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     return {"access_token": token, "token_type": "bearer", "user": user}
 
 
+class DemoLoginRequest(BaseModel):
+    email: str
+
+
+@app.get("/api/auth/demo-users")
+def get_demo_users():
+    """Return pre-configured demo user personas with rich sample profiles."""
+    return [
+        {
+            "email": "demo@candidate.com",
+            "name": "Alex Morgan",
+            "role": "Senior Full-Stack & Cloud Systems Architect",
+            "badge": "Software Engineer / Tech Lead",
+            "avatar": "AM",
+            "template_name": "modern",
+            "theme_color": "#1e3a8a",
+            "description": "5+ years building scalable microservices and reactive SPAs with Python, FastAPI, and React.",
+            "skills": ["Python & FastAPI", "React & TS", "PostgreSQL", "Docker", "System Design"]
+        },
+        {
+            "email": "sarah.jenkins@demo.com",
+            "name": "Sarah Jenkins",
+            "role": "Senior Technical Product Manager",
+            "badge": "Product Management",
+            "avatar": "SJ",
+            "template_name": "executive",
+            "theme_color": "#065f46",
+            "description": "Data-driven PM with 7+ years delivering enterprise SaaS, AI products, and cross-functional leadership.",
+            "skills": ["Roadmap Strategy", "Agile & Scrum", "Data Analytics", "User Research", "Go-To-Market"]
+        },
+        {
+            "email": "david.chen@demo.com",
+            "name": "David Chen",
+            "role": "Lead UI/UX & Product Designer",
+            "badge": "UI/UX & Design",
+            "avatar": "DC",
+            "template_name": "creative",
+            "theme_color": "#581c87",
+            "description": "Design lead creating intuitive mobile & web design systems, user journeys, and high-fidelity prototypes.",
+            "skills": ["Figma", "Design Systems", "Wireframing", "Prototyping", "Accessibility (WCAG)"]
+        },
+        {
+            "email": "emily.taylor@demo.com",
+            "name": "Emily Taylor",
+            "role": "Junior Software Engineer",
+            "badge": "Fresh Graduate",
+            "avatar": "ET",
+            "template_name": "classic",
+            "theme_color": "#881337",
+            "description": "Summa Cum Laude CS graduate with strong foundations in algorithms, object-oriented programming, and web development.",
+            "skills": ["Java & Python", "Data Structures", "Algorithms", "Git & GitHub", "SQL"]
+        }
+    ]
+
+
+@app.post("/api/auth/demo-login", response_model=TokenResponse)
+def demo_login(req: DemoLoginRequest, db: Session = Depends(get_db)):
+    """Instant 1-click login as any demo persona."""
+    target_email = req.email.strip().lower()
+    user = db.query(User).filter(User.email == target_email).first()
+    if not user:
+        seed_sample_data(db)
+        user = db.query(User).filter(User.email == target_email).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Demo persona '{target_email}' not found."
+        )
+
+    token = create_access_token({"sub": str(user.id), "email": user.email})
+    return {"access_token": token, "token_type": "bearer", "user": user}
+
+
 @app.post("/api/auth/login", response_model=TokenResponse)
 def login(user_data: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == user_data.email.lower()).first()
@@ -220,6 +567,80 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password credentials."
+        )
+
+    token = create_access_token({"sub": str(user.id), "email": user.email})
+    return {"access_token": token, "token_type": "bearer", "user": user}
+
+
+class DemoLoginRequest(BaseModel):
+    email: str
+
+
+@app.get("/api/auth/demo-users")
+def get_demo_users():
+    """Return pre-configured demo user personas with rich sample profiles."""
+    return [
+        {
+            "email": "demo@candidate.com",
+            "name": "Alex Morgan",
+            "role": "Senior Full-Stack & Cloud Systems Architect",
+            "badge": "Software Engineer / Tech Lead",
+            "avatar": "AM",
+            "template_name": "modern",
+            "theme_color": "#1e3a8a",
+            "description": "5+ years building scalable microservices and reactive SPAs with Python, FastAPI, and React.",
+            "skills": ["Python & FastAPI", "React & TS", "PostgreSQL", "Docker", "System Design"]
+        },
+        {
+            "email": "sarah.jenkins@demo.com",
+            "name": "Sarah Jenkins",
+            "role": "Senior Technical Product Manager",
+            "badge": "Product Management",
+            "avatar": "SJ",
+            "template_name": "executive",
+            "theme_color": "#065f46",
+            "description": "Data-driven PM with 7+ years delivering enterprise SaaS, AI products, and cross-functional leadership.",
+            "skills": ["Roadmap Strategy", "Agile & Scrum", "Data Analytics", "User Research", "Go-To-Market"]
+        },
+        {
+            "email": "david.chen@demo.com",
+            "name": "David Chen",
+            "role": "Lead UI/UX & Product Designer",
+            "badge": "UI/UX & Design",
+            "avatar": "DC",
+            "template_name": "creative",
+            "theme_color": "#581c87",
+            "description": "Design lead creating intuitive mobile & web design systems, user journeys, and high-fidelity prototypes.",
+            "skills": ["Figma", "Design Systems", "Wireframing", "Prototyping", "Accessibility (WCAG)"]
+        },
+        {
+            "email": "emily.taylor@demo.com",
+            "name": "Emily Taylor",
+            "role": "Junior Software Engineer",
+            "badge": "Fresh Graduate",
+            "avatar": "ET",
+            "template_name": "classic",
+            "theme_color": "#881337",
+            "description": "Summa Cum Laude CS graduate with strong foundations in algorithms, object-oriented programming, and web development.",
+            "skills": ["Java & Python", "Data Structures", "Algorithms", "Git & GitHub", "SQL"]
+        }
+    ]
+
+
+@app.post("/api/auth/demo-login", response_model=TokenResponse)
+def demo_login(req: DemoLoginRequest, db: Session = Depends(get_db)):
+    """Instant 1-click login as any demo persona."""
+    target_email = req.email.strip().lower()
+    user = db.query(User).filter(User.email == target_email).first()
+    if not user:
+        seed_sample_data(db)
+        user = db.query(User).filter(User.email == target_email).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Demo persona '{target_email}' not found."
         )
 
     token = create_access_token({"sub": str(user.id), "email": user.email})
