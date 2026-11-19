@@ -1,5 +1,5 @@
 # Online Resume Builder with PDF Generation
-**CSE347: Information Systems Analysis & Design — Lab Examination**  
+**CSE412: Information Systems Analysis & Design — Lab Examination**  
 **Full-Stack Web Application**
 
 A production-ready, feature-rich web platform that enables job seekers to create, edit, preview, manage, and export professional, ATS-friendly resumes. Built with a **Python FastAPI** backend, a reactive **React + Vite** frontend, a **PostgreSQL** database (with seamless local SQLite fallback), and a **Jinja2 + xhtml2pdf** document generation engine.
